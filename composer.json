@@ -1,0 +1,25 @@
+{
+  "name": "HWPageFormsLocationInput",
+  "type": "mediawiki-extension",
+  "description": "Adds new input (leaflet) to handle locations at Page Forms extension",
+  "keywords": [
+    "Hitchwiki",
+    "MediaWiki",
+    "Leaflet",
+    "map"
+  ],
+  "homepage": "https://github.com/Hitchwiki/HWPageFormsLocationInput-extension",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Hitchwiki",
+      "homepage": "http://hitchwiki.org"
+    }
+  ],
+  "require": {
+    "mediawiki/page-forms": ">=4.0"
+  },
+  "support": {
+    "irc": "irc://irc.freenode.net/hitchhiking"
+  }
+}

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mikael Korpela"
+		]
+	},
+	"hwpageformsleafletinput-extensionname": "Hitchwiki Page-Forms Leaflet input",
+	"hwpageformsleafletinput-desc": "Adds new input (leaflet) to handle locations at Page Forms extension"
+}

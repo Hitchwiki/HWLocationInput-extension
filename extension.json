@@ -1,0 +1,35 @@
+{
+	"@Note": "When updating this file please also update HWPageFormsLocationInput.php with the same changes.",
+	"name": "HWPageFormsLocationInput",
+	"namemsg": "hwpageformslocationinput-extensionname",
+	"version": "1.0.0",
+	"author": [
+		"Mikael Korpela"
+	],
+	"url": "https://github.com/Hitchwiki/HWPageFormsLocationInput-extension",
+	"descriptionmsg": "hwpageformslocationinput-desc",
+	"type": "other",
+	"MessagesDirs": {
+		"HWPageFormsLocationInput": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.hwpageformslocationinput.main": {
+			"scripts": [
+				"resources/js/ext.hwpageformslocationinput.js",
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "HWPageFormsLocationInput"
+	},
+	"Hooks": {
+		"ParserFirstCallInit": [
+			"ParserFunctionsHooks::onParserFirstCallInit"
+		]
+	},
+	"config": {},
+	"manifest_version": 1
+}
