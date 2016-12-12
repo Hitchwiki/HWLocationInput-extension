@@ -1,6 +1,7 @@
-# Hitchwiki Page-Forms Location input
+# Hitchwiki Location input
+### for Page-Forms extension
 
-Adds new location input ("hw-location") to handle Hitchwiki locations (for cities, areas, countries and spots) at [Page Forms](https://www.mediawiki.org/wiki/Extension:Page_Forms) extension.
+Adds new input type ("HW_Location") to handle Hitchwiki locations for [Page Forms](https://www.mediawiki.org/wiki/Extension:Page_Forms) extension.
 
 Internal project extension to use at our wikis ([Hitchwiki](http://hitchwiki.org), [Nomadwiki](http://hitchwiki.org), [Trashwiki](http://trashwiki.org)).
 
@@ -14,11 +15,11 @@ Note that normal Hitchwiki takes care of installing this extension.
 
 Clone under `extensions`:
 ```bash
-git clone https://github.com/Hitchwiki/HWPageFormsLocationInput-extension.git extensions/HWPageFormsLocationInput
+git clone https://github.com/Hitchwiki/HWLocationInput-extension.git extensions/HWLocationInput
 ```
 Add to LocalSettings.php
 ```php
-wfLoadExtension('HWPageFormsLocationInput');
+wfLoadExtension('HWLocationInput');
 ```
 
 # License

@@ -1,34 +1,29 @@
 {
-	"name": "HWPageFormsLocationInput",
-	"namemsg": "hwpageformslocationinput-extensionname",
+	"name": "HWLocationInput",
+	"namemsg": "hwfl-extensionname",
 	"version": "1.0.0",
 	"author": [
 		"Mikael Korpela"
 	],
-	"url": "https://github.com/Hitchwiki/HWPageFormsLocationInput-extension",
-	"descriptionmsg": "hwpageformslocationinput-desc",
-	"type": "other",
+	"url": "https://github.com/Hitchwiki/HWLocationInput-extension",
+	"descriptionmsg": "hwfl-desc",
+	"license-name": "MIT",
+	"type": "semantic",
+	"requires": {
+		"MediaWiki": ">= 1.27"
+	},
 	"MessagesDirs": {
-		"HWPageFormsLocationInput": [
+		"HWLocationInput": [
 			"i18n"
 		]
 	},
-	"ResourceModules": {
-		"ext.hwpageformslocationinput.main": {
-			"scripts": [
-				"resources/js/ext.HWPageFormsLocationInput.js"
-			]
-		}
+	"AutoloadClasses": {
+		"HWLocationInput": "HWLocationInput.php"
 	},
-	"ResourceFileModulePaths": {
-		"localBasePath": "",
-		"remoteExtPath": "HWPageFormsLocationInput"
-	},
-	"Hooks": {
-		"ParserFirstCallInit": [
-			"ParserFunctionsHooks::onParserFirstCallInit"
-		]
-	},
-	"config": {},
+	"callback": "HWLocationInput::initExtension",
+	"ExtensionFunctions": [
+		"HWLocationInput::onExtensionFunction"
+	],
+	"load_composer_autoloader": true,
 	"manifest_version": 1
 }

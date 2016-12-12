@@ -4,6 +4,6 @@
 			"Mikael Korpela"
 		]
 	},
-	"hwpageformsleafletinput-extensionname": "Hitchwiki Page-Forms Leaflet input",
-	"hwpageformsleafletinput-desc": "Adds new input (leaflet) to handle locations at Page Forms extension"
+	"hwfl-desc": "Adds Hitchwiki Location input type to Page Forms extension.",
+	"hwfl-extensionname": "Hitchwiki Location input"
 }
