@@ -9,7 +9,7 @@ class ParserFunctionsHooks {
 	public static function onParserFirstCallInit( $parser ) {
     global $sfgFormPrinter;
 
-    $sfgFormPrinter->setInputTypeHook('hw-location', 'hw_location_input_html', array());
+    $sfgFormPrinter->setInputTypeHook('hwlocation', 'hw_location_input_html', array());
 
     function hw_location_input_html($cur_value, $input_name, $is_mandatory, $is_disabled, $field_args) {
       echo "<br>";

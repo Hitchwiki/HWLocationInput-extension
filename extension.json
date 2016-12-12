@@ -1,5 +1,4 @@
 {
-	"@Note": "When updating this file please also update HWPageFormsLocationInput.php with the same changes.",
 	"name": "HWPageFormsLocationInput",
 	"namemsg": "hwpageformslocationinput-extensionname",
 	"version": "1.0.0",
@@ -17,7 +16,7 @@
 	"ResourceModules": {
 		"ext.hwpageformslocationinput.main": {
 			"scripts": [
-				"resources/js/ext.hwpageformslocationinput.js",
+				"resources/js/ext.HWPageFormsLocationInput.js"
 			]
 		}
 	},
