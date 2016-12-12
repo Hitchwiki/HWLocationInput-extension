@@ -2,8 +2,10 @@
  * return a jquery pattern string to find out form fields which values will be changed
  *
  */
-function SFSelect_getSelectFieldPat(nameObj, f )
+
+function HWLocationInput_getSelectFieldPat(nameObj, f )
 {
+  mw.log('->HWLocationInput->HWLocationInput_getSelectFieldPat');
 	var selectpat = "";
 	if (f.selectismultiple)
 	{
@@ -44,7 +46,7 @@ function SFSelect_getSelectFieldPat(nameObj, f )
 /*
  * Parse the SF field name into an objetc for easy process
  */
-function SFSelect_parseName(name)
+function HWLocationInput_parseName(name)
 {
 	var names=name.split('[');
 	var nameObj={template:names[0]};
@@ -82,9 +84,9 @@ function SFSelect_parseName(name)
 	return nameObj;
 }
 
-function SFSelect_setDependentValues (nameobj, fobj, values){
+function HWLocationInput_setDependentValues (nameobj, fobj, values){
 
-	var selectPat=SFSelect_getSelectFieldPat(nameobj, fobj);
+	var selectPat=HWLocationInput_getSelectFieldPat(nameobj, fobj);
 	jQuery(selectPat).each(function(index, element){
 		//keep selected values;
 		var selectedValues=jQuery(element).val();
@@ -99,7 +101,7 @@ function SFSelect_setDependentValues (nameobj, fobj, values){
 		var newselected=[];
 
 		if ( fobj.label ) {
-			var namevalues = SFSelect_processNameValues( values );
+			var namevalues = HWLocationInput_processNameValues( values );
 
 			for(var i=0; i<namevalues.length; i++){
 				element.options[i]=new Option(namevalues[i][1], namevalues[i][0]);
@@ -126,7 +128,7 @@ function SFSelect_setDependentValues (nameobj, fobj, values){
 				if (selectedValues.length!=0 || values.length === 1)
 					jQuery(element).trigger("change");
 			}
-		} else if (!SFSelect_arrayEqual(newselected, selectedValues)){
+		} else if (!HWLocationInput_arrayEqual(newselected, selectedValues)){
 			jQuery(element).trigger("change");
 		}
 	});
@@ -134,7 +136,7 @@ function SFSelect_setDependentValues (nameobj, fobj, values){
 
 /** Function for turning name values from 'Page (property)' results **/
 
-function SFSelect_processNameValues( values ) {
+function HWLocationInput_processNameValues( values ) {
 
 	var namevalues = [];
 
@@ -165,7 +167,7 @@ function SFSelect_processNameValues( values ) {
 
 }
 
-function SFSelect_arrayEqual(a, b)
+function HWLocationInput_arrayEqual(a, b)
 {
 	if (a.length!=b.length)
 		return false;
@@ -184,6 +186,8 @@ function SFSelect_arrayEqual(a, b)
 
 	'use strict';
 
+  mw.log('->HWLocationInput');
+
 	/**
 	 * valuetemplate:string,
 	 * valuefield:string, value is the form field on which other select element depends on. change
@@ -196,9 +200,9 @@ function SFSelect_arrayEqual(a, b)
 	 * label: boolean, process ending content () as label in option values.
 	 * sep: Separator for the list of retrieved values, default ','
 	 */
-	var SFSelect_fobjs = $.parseJSON( mw.config.get( 'sf_select' ) );
+	var HWLocationInput_fobjs = $.parseJSON( mw.config.get( 'hwlocationinput' ) );
 
-	function SFSelect_changeHandler (src ) {
+	function HWLocationInput_changeHandler (src ) {
 
 		//console.log("change is called with "+src.name);
 		if (src.tagName.toLowerCase()!='select'&& src.tagName.toLowerCase()!='input')
@@ -216,16 +220,16 @@ function SFSelect_arrayEqual(a, b)
 		{
 			v=[v];
 		}
-		var srcName=SFSelect_parseName(src.name);
-		for(var i=0; i<SFSelect_fobjs.length; i++)
+		var srcName=HWLocationInput_parseName(src.name);
+		for(var i=0; i<HWLocationInput_fobjs.length; i++)
 		{
-			var fobj=SFSelect_fobjs[i];
+			var fobj=HWLocationInput_fobjs[i];
 			if (srcName.template==fobj.valuetemplate && srcName.property==fobj.valuefield)
 			{
 				//good, we have a match.
 				// No values
 				if (v.length==0||v[0]==''){
-					SFSelect_setDependentValues(srcName, fobj, []);
+					HWLocationInput_setDependentValues(srcName, fobj, []);
 				} else {
 					// Values
 					var param = {}
@@ -247,7 +251,7 @@ function SFSelect_arrayEqual(a, b)
 					var posting = jQuery.get( mw.config.get('wgScriptPath')  + "/api.php", param );
 					posting.done(function( data ) {
 						// Let's pass values
-						SFSelect_setDependentValues(srcName, fobj, data["sformsselect"].values);
+						HWLocationInput_setDependentValues(srcName, fobj, data["sformsselect"].values);
 					}).fail( function( data ) { console.log("Error!");});
 
 					break; // Avoid loading fobj again
@@ -260,12 +264,12 @@ function SFSelect_arrayEqual(a, b)
 	 * SF form add a fobj for each field in a multiple template.
 	 * In reality we only need a fobj to reduce the ajax call.
 	 */
-	function SFSelect_removeDuplicateFobjs( SFSelect_fobjs ) {
+	function HWLocationInput_removeDuplicateFobjs( HWLocationInput_fobjs ) {
 		var newfobjs = [];
 
-		for(var i=0; i<SFSelect_fobjs.length; i++) {
+		for(var i=0; i<HWLocationInput_fobjs.length; i++) {
 			var found=false;
-			var of=SFSelect_fobjs[i];
+			var of=HWLocationInput_fobjs[i];
 			if (!of.selectismultiple)
 			{
 				newfobjs.push(of);
@@ -288,21 +292,21 @@ function SFSelect_arrayEqual(a, b)
 		return newfobjs;
 	}
 
-	//console.log( SFSelect_fobjs );
+	//console.log( HWLocationInput_fobjs );
 
 	//simplify duplicated object.
-	SFSelect_fobjs = SFSelect_removeDuplicateFobjs( SFSelect_fobjs );
+	HWLocationInput_fobjs = HWLocationInput_removeDuplicateFobjs( HWLocationInput_fobjs );
 
 	$( "form#pfForm" ).change( function( event ){
-		SFSelect_changeHandler( event.target );
+		HWLocationInput_changeHandler( event.target );
 	});
 
 	var objs = null;
 
 	//fields loading at load time.
-	for (var i=0; i<SFSelect_fobjs.length; i++){
+	for (var i=0; i<HWLocationInput_fobjs.length; i++){
 
-		var fobj = SFSelect_fobjs[i];
+		var fobj = HWLocationInput_fobjs[i];
 		var valuepat = "input[name='" + fobj.valuetemplate + "\\["+ fobj.valuefield + "\\]']";
 
 		if ($(valuepat).val()){

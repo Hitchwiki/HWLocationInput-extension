@@ -7,9 +7,9 @@ use ParserOutput;
 
 /**
  * @license MIT
- * @since 1.3
+ * @since 1.0
  *
- * @author mwjames
+ * @author Mikael Korpela
  */
 class Output {
 
@@ -24,7 +24,7 @@ class Output {
 	private static $resourceModules = array();
 
 	/**
-	 * @since 1.3
+	 * @since 1.0
 	 *
 	 * @param string $moduleName
 	 */
@@ -33,7 +33,7 @@ class Output {
 	}
 
 	/**
-	 * @since 1.3
+	 * @since 1.0
 	 *
 	 * @param string $id
 	 * @param string $data
@@ -43,7 +43,7 @@ class Output {
 	}
 
 	/**
-	 * @since 1.3
+	 * @since 1.0
 	 *
 	 * @param ParserOutput $parserOutput
 	 */

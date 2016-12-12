@@ -3,9 +3,9 @@
 use HWLI\HookRegistry;
 
 /**
- * @see https://github.com/SemanticMediaWiki/HWLocationInput/
+ * @see https://github.com/Hitchwiki/HWLocationInput-extension
  *
- * @defgroup HWLocationInput Semantic Forms Select
+ * @defgroup HWLocationInput Hitchwiki Location Input
  * @codeCoverageIgnore
  */
 class HWLocationInput {
@@ -18,10 +18,10 @@ class HWLocationInput {
 		define( 'HWLI_VERSION', '1.0.0' );
 
 		// Api modules
-		$GLOBALS['wgAPIModules']['sformsselect'] = 'HWLI\ApiHWLocationInput';
+		// $GLOBALS['wgAPIModules']['hwlocationinput'] = 'HWLI\ApiHWLocationInput';
 
 		$GLOBALS['wgScriptSelectCount'] = 0;
-		$GLOBALS['wgHWLocationInput_debug'] = 0; // Debug on/off
+		$GLOBALS['wgHWLocationInput_debug'] = 1; // Debug on/off
 
 		// Register resource files
 		$GLOBALS['wgResourceModules']['ext.HWLocationInput'] = array(
@@ -43,11 +43,11 @@ class HWLocationInput {
 	public static function onExtensionFunction() {
 
 		if ( !defined( 'PF_VERSION' ) ) {
-			die( '<b>Error:</b><a href="https://github.com/SemanticMediaWiki/HWLocationInput/">Semantic Forms Select</a> requires the <a href="https://www.mediawiki.org/wiki/Extension:PageForms">Page Forms</a> extension. Please install and activate this extension first.' );
+			die( '<b>Error:</b><a href="https://github.com/SemanticMediaWiki/HWLocationInput/">Hitchwiki Location Input</a> requires the <a href="https://www.mediawiki.org/wiki/Extension:PageForms">Page Forms</a> extension. Please install and activate this extension first.' );
 		}
 
 		if ( isset( $GLOBALS['wgPageFormsFormPrinter'] )) {
-			$GLOBALS['wgPageFormsFormPrinter']->setInputTypeHook( 'SF_Select', '\HWLI\HWLocationInput::init', array() );
+			$GLOBALS['wgPageFormsFormPrinter']->setInputTypeHook( 'HW_Location', '\HWLI\HWLocationInput::init', array() );
 		}
 	}
 

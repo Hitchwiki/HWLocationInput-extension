@@ -7,10 +7,9 @@ use Parser;
 
 /**
  * @license MIT
- * @since 1.3
+ * @since 1.0
  *
- * @author Jason Zhang
- * @author Toni Hermoso Pulido
+ * @author Mikael Korpela
  */
 class HWLocationInput {
 
@@ -27,7 +26,7 @@ class HWLocationInput {
 	private $parser;
 
 	/**
-	 * @since 1.3
+	 * @since 1.0
 	 *
 	 * @param Parser $parser
 	 */
@@ -36,7 +35,7 @@ class HWLocationInput {
 	}
 
 	/**
-	 * @since 1.3
+	 * @since 1.0
 	 *
 	 * @return string
 	 */
@@ -44,16 +43,17 @@ class HWLocationInput {
 
 		$instance = new self( $GLOBALS['wgParser'] );
 
-		return $instance->select( $value, $inputName, $isMandatory, $isDisabled, $otherArgs );
+		return $instance->locationInput( $value, $inputName, $isMandatory, $isDisabled, $otherArgs );
 	}
 
-	public function select ( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args ) {
+	public function locationInput ( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args ) {
 		global $wgScriptSelectCount, $sfgFieldNum, $wgUser;
 
-		$selectField = array();
+		$locationField = array();
 		$values = null;
 		$staticvalue = false;
 
+    /*
 		if ( array_key_exists( "query", $other_args ) ) {
 			$query = $other_args["query"];
 
@@ -63,7 +63,7 @@ class HWLocationInput {
 				$query
 			);
 
-			$selectField["query"] = $query;
+			$locationField["query"] = $query;
 
 			if ( strpos ($query, '@@@@') === false ) {
 				$params = explode(";", $query);
@@ -82,7 +82,7 @@ class HWLocationInput {
 				$query
 			);
 
-			$selectField["function"] = $query;
+			$locationField["function"] = $query;
 
 			if ( strpos( $query, '@@@@' ) === false ) {
 				$f = str_replace( ";", "|", $query );
@@ -90,17 +90,20 @@ class HWLocationInput {
 				$staticvalue = true;
 			}
 		}
+    */
 
 		$data = array();
 
+    /*
 		if ($staticvalue) {
 			$values = explode(",", $values);
 			$values = array_map("trim", $values);
 			$values = array_unique($values);
 		} else {
+    */
 
 			if ($wgScriptSelectCount == 0 ) {
-				Output::addModule( 'ext.sf_select.scriptselect' );
+				Output::addModule( 'ext.HWLocationInput' );
 			}
 
 			$wgScriptSelectCount++;
@@ -122,14 +125,14 @@ class HWLocationInput {
 			$data['label'] = array_key_exists( 'label', $other_args );
 			$data['sep'] = array_key_exists( 'sep', $other_args ) ? $other_args["sep"] : ',';
 
-			if (array_key_exists("query", $selectField ) ) {
-				$data['selectquery'] = $selectField['query'];
+			if (array_key_exists("query", $locationField ) ) {
+				$data['selectquery'] = $locationField['query'];
 			} else{
-				$data['selectfunction'] = $selectField['function'];
+				$data['selectfunction'] = $locationField['function'];
 			}
 
 			self::$data[] = $data;
-		}
+		//}
 
 		$extraatt="";
 		$is_list=false;
@@ -204,7 +207,7 @@ class HWLocationInput {
 		}
 
 		if ( !$staticvalue ){
-			Output::addToHeadItem( 'sf_select', self::$data );
+			Output::addToHeadItem( 'hwlocationinput', self::$data );
 		}
 
 		Output::commitToParserOutput( $this->parser->getOutput() );
