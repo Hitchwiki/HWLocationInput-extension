@@ -22,5 +22,13 @@ Add to LocalSettings.php
 wfLoadExtension('HWLocationInput');
 ```
 
+Make sure you have these defined at LocalSettings.php:
+```php
+$hwConfig['vendor']['mapbox_username']
+$hwConfig['vendor']['mapbox_access_token']
+$hwConfig['vendor']['mapbox_mapkey_streets']
+$hwConfig['vendor']['mapbox_mapkey_satellite']
+```
+
 # License
 MIT

@@ -14,13 +14,6 @@ use Parser;
 class HWLocationInput {
 
 	/**
-	 * Internal data container
-	 *
-	 * @var array
-	 */
-	private static $data = array();
-
-	/**
 	 * @var Parser
 	 */
 	private $parser;
@@ -46,173 +39,44 @@ class HWLocationInput {
 		return $instance->locationInput( $value, $inputName, $isMandatory, $isDisabled, $otherArgs );
 	}
 
-	public function locationInput ( $cur_value, $input_name, $is_mandatory, $is_disabled, $other_args ) {
-		global $wgScriptSelectCount, $sfgFieldNum, $wgUser;
+	public function locationInput ( $value, $inputName, $isMandatory, $isDisabled, $otherArgs ) {
+    global $wgHWLICount; // Keeps the count how many of locationInput's we already created
 
-		$locationField = array();
-		$values = null;
-		$staticvalue = false;
-
-    /*
-		if ( array_key_exists( "query", $other_args ) ) {
-			$query = $other_args["query"];
-
-			$query = str_replace(
-				array( "~", "(", ")" ),
-				array( "=", "[", "]" ),
-				$query
-			);
-
-			$locationField["query"] = $query;
-
-			if ( strpos ($query, '@@@@') === false ) {
-				$params = explode(";", $query);
-				$params[0] = $this->parser->replaceVariables( $params[0] );
-				$values = QueryProcessor::getResultFromFunctionParams($params,SMW_OUTPUT_WIKI);
-				$staticvalue = true;
-			}
-
-		} elseif ( array_key_exists( "function", $other_args ) ) {
-			$query = $other_args["function"];
-			$query = '{{#'.$query.'}}';
-
-			$query = str_replace(
-				array( "~", "(", ")" ),
-				array( "=", "[", "]" ),
-				$query
-			);
-
-			$locationField["function"] = $query;
-
-			if ( strpos( $query, '@@@@' ) === false ) {
-				$f = str_replace( ";", "|", $query );
-				$values = $this->parser->replaceVariables( $f );
-				$staticvalue = true;
-			}
+		if ($wgHWLICount == 0 ) {
+      // Loads javascript, but only once
+      Output::addModule('ext.HWLocationInput');
 		}
-    */
+		$wgHWLICount++;
 
-		$data = array();
+    // $size_regexp = '/\d*\.?\d+(?:px|%)?/i';
+		$width = array_key_exists( 'width', $otherArgs ) ? strip_tags($otherArgs['width']) : '100%';
+		$height = array_key_exists( 'height', $otherArgs ) ? strip_tags($otherArgs['height']) : '300px';
+		$zoom = array_key_exists( 'zoom', $otherArgs ) ? intval($otherArgs['zoom']) : 5;
 
-    /*
-		if ($staticvalue) {
-			$values = explode(",", $values);
-			$values = array_map("trim", $values);
-			$values = array_unique($values);
-		} else {
-    */
+    // Input arguments for disabled fields
+    $disabledArg = $isDisabled ? 'disabled="disabled" ' : '';
 
-			if ($wgScriptSelectCount == 0 ) {
-				Output::addModule( 'ext.HWLocationInput' );
-			}
-
-			$wgScriptSelectCount++;
-
-			$data["selectismultiple"] = array_key_exists( "part_of_multiple", $other_args );
-
-			$index = strpos($input_name, "[");
-			$data['selecttemplate'] = substr($input_name, 0, $index);
-
-			// Does hit work for multiple template?
-			$index = strrpos($input_name, "[");
-			$data['selectfield'] = substr( $input_name, $index+1, strlen( $input_name ) - $index - 2 );
-
-			$valueField = array();
-			$data["valuetemplate"] = array_key_exists( "sametemplate", $other_args ) ? $data['selecttemplate'] : $other_args["template"];
-			$data["valuefield"] = $other_args["field"];
-
-			$data['selectrm'] = array_key_exists( 'rmdiv', $other_args );
-			$data['label'] = array_key_exists( 'label', $other_args );
-			$data['sep'] = array_key_exists( 'sep', $other_args ) ? $other_args["sep"] : ',';
-
-			if (array_key_exists("query", $locationField ) ) {
-				$data['selectquery'] = $locationField['query'];
-			} else{
-				$data['selectfunction'] = $locationField['function'];
-			}
-
-			self::$data[] = $data;
-		//}
-
-		$extraatt="";
-		$is_list=false;
-
-		// TODO This needs clean-up
-
-		if (array_key_exists('is_list', $other_args) && $other_args['is_list']==true){
-			$is_list=true;
-		}
-		if ($is_list){
-			$extraatt=' multiple="multiple" ';
-		}
-		if(array_key_exists("size", $other_args)){
-			$extraatt.=" size=\"{$other_args['size']}\"";
-		}
-		$classes=array();
-		if($is_mandatory){
-			$classes[]="mandatoryField";
-		}
-		if (array_key_exists("class", $other_args)){
-			$classes[]=$other_args['class'];
-		}
-		if ($classes){
-			$cstr=implode(" ",$classes);
-			$extraatt.=" class=\"$cstr\"";
-		}
-		$inname=$input_name;
-		if ($is_list){
-			$inname.='[]';
-		}
+    // input arguments for mandatory fields
+    $mandatoryArg = $isMandatory ? 'class="mandatoryField" ' : '';
 
 		// TODO Use Html::
+    // https://doc.wikimedia.org/mediawiki-core/1.28.0/php/classHtml.html
+    // https://www.mediawiki.org/wiki/Manual:Html.php
+    $html = '<div' .
+              ' class="hw_location_map"' .
+              ' id="hw_location_map_' . $wgHWLICount . '"' .
+              ' data-field-number="' . $wgHWLICount . '"' .
+              ' data-zoom="' . $zoom . '"' .
+              ' style="width:' . $width . ';height:' . $height . ';"' .
+            '></div>';
 
-		$spanextra=$is_mandatory?'mandatoryFieldSpan':'';
-		$ret="<span class=\"inputSpan $spanextra\"><select name='$inname' id='input_$sfgFieldNum' $extraatt>";
-		$curvalues=null;
-		if ($cur_value){
-			if ($cur_value==='current user'){
-				$cur_value=$wgUser->getName();
-			}
-			if (is_array($cur_value) ){
-				$curvalues=$cur_value;
-			} else{
-				$curvalues=array_map("trim", explode(",", $cur_value));
-			}
+    $html .= '<input type="hidden" name="' . $inputName . '" value="' . $value . '" id="hw_location_input_' . $wgHWLICount . '" ' . $disabledArg . $mandatoryArg . ' />';
 
-		} else {
-			$curvalues=array();
-		}
+		$html .= '<span id="info_' . $wgHWLICount . '" class="errorMessage"></span>';
 
-		// TODO handle empty value case.
-		$ret.="<option></option>";
+		Output::commitToParserOutput($this->parser->getOutput());
 
-		foreach ($curvalues as $cur) {
-			$ret.="<option selected='selected'>$cur</option>";
-		}
-
-		if ($staticvalue){
-			foreach($values as $val){
-				if(!in_array($val, $curvalues)){
-					$ret.="<option>$val</option>";
-				}
-			}
-		}
-
-		$ret.="</select></span>";
-		$ret.="<span id=\"info_$sfgFieldNum\" class=\"errorMessage\"></span>";
-
-		if ($other_args["is_list"]){
-			$hiddenname=$input_name.'[is_list]';
-			$ret.="<input type='hidden' name='$hiddenname' value='1' />";
-		}
-
-		if ( !$staticvalue ){
-			Output::addToHeadItem( 'hwlocationinput', self::$data );
-		}
-
-		Output::commitToParserOutput( $this->parser->getOutput() );
-
-		return $ret;
+		return $html;
 	}
 
 }

@@ -1,323 +1,189 @@
-/*
- * return a jquery pattern string to find out form fields which values will be changed
- *
+/**
+ * Hitchwiki Location Field
+ * Relies to Leaflet.js
  */
-
-function HWLocationInput_getSelectFieldPat(nameObj, f )
-{
-  mw.log('->HWLocationInput->HWLocationInput_getSelectFieldPat');
-	var selectpat = "";
-	if (f.selectismultiple)
-	{
-		if (f.selecttemplate == f.valuetemplate)
-		{
-			// each select field in a multiple
-			// template depends on its value field.
-
-			var pat="select[name='"+f.selecttemplate+"["+nameObj.index+"]["+f.selectfield+"]']";
-			var pat1="select[name='"+f.selecttemplate+"["+nameObj.index+"]["+f.selectfield+"][]']";
-			selectpat=pat+","+pat1;
-		} else
-		{
-			// multiple select fields depends on one
-			// value field.
-			selectpat = "select[name^='"
-					+ f.selecttemplate
-					+ "'][name$='["
-					+ f.selectfield
-					+ "]'], select[name^='"
-					+ f.selecttemplate
-					+ "'][name$='["
-					+ f.selectfield + "][]']";
-		}
-
-	} else
-	{
-		selectpat = "select[name='"
-				+ f.selecttemplate + "["
-				+ f.selectfield
-				+ "]'], select[name='"
-				+ f.selecttemplate + "["
-				+ f.selectfield + "][]']";
-	}
-	return selectpat;
-}
-
-/*
- * Parse the SF field name into an objetc for easy process
- */
-function HWLocationInput_parseName(name)
-{
-	var names=name.split('[');
-	var nameObj={template:names[0]};
-	if(names[names.length-1]==']')
-	{
-		nameObj.isList=true;
-		var property=names[names.length-2]
-		property=property.substr(0, property.length-1);
-		nameObj.property=property;
-		if (names.length==4)
-		{
-			var index=names[1];
-			index=index.substr(0, index.length-1);
-			nameObj.index=index;
-		} else
-		{
-			nameObj.index=null;
-		}
-	} else
-	{
-		nameObj.isList=false;
-		var property=names[names.length-1]
-		property=property.substr(0, property.length-1);
-		nameObj.property=property;
-		if (names.length==3)
-		{
-			var index=names[1];
-			index=index.substr(0, index.length-1);
-			nameObj.index=index;
-		} else
-		{
-			nameObj.index=null;
-		}
-	}
-	return nameObj;
-}
-
-function HWLocationInput_setDependentValues (nameobj, fobj, values){
-
-	var selectPat=HWLocationInput_getSelectFieldPat(nameobj, fobj);
-	jQuery(selectPat).each(function(index, element){
-		//keep selected values;
-		var selectedValues=jQuery(element).val();
-		if (!selectedValues){
-			selectedValues=[];
-		} else if (!jQuery.isArray(selectedValues)){
-			selectedValues=[selectedValues];
-		}
-
-		element.options.length=values.length;
-
-		var newselected=[];
-
-		if ( fobj.label ) {
-			var namevalues = HWLocationInput_processNameValues( values );
-
-			for(var i=0; i<namevalues.length; i++){
-				element.options[i]=new Option(namevalues[i][1], namevalues[i][0]);
-				if (jQuery.inArray(namevalues[i][0], selectedValues)!=-1){
-					element.options[i].selected=true;
-					newselected.push(namevalues[i][0]);
-				}
-			}
-		} else {
-
-			for(var i=0; i<values.length; i++){
-				element.options[i]=new Option(values[i]);
-				if (jQuery.inArray(values[i], selectedValues)!=-1){
-					element.options[i].selected=true;
-					newselected.push(values[i]);
-				}
-			}
-		}
-
-		if (newselected.length==0){
-			if (fobj.selectrm && fobj.selecttemplate != fobj.valuetemplate&&fobj.selectismultiple){
-				jQuery(element).closest("div.multipleTemplateInstance").remove();
-			} else{
-				if (selectedValues.length!=0 || values.length === 1)
-					jQuery(element).trigger("change");
-			}
-		} else if (!HWLocationInput_arrayEqual(newselected, selectedValues)){
-			jQuery(element).trigger("change");
-		}
-	});
-}
-
-/** Function for turning name values from 'Page (property)' results **/
-
-function HWLocationInput_processNameValues( values ) {
-
-	var namevalues = [];
-
-	var regex = " (";
-
-	for(var i=0; i<values.length; i++){
-
-		var postval = values[i].split( regex );
-		if ( postval.length < 2 ) {
-			namevalues[i] = [ values[i], values[i] ];
-		} else if ( postval.length === 2 ) {
-			var label = postval[1].replace(/\)\s*$/, "");
-			var value = postval[0];
-
-			namevalues[i] = [ value, label ];
-		} else {
-			var last = postval.length - 1;
-			var label = postval[last].replace(/\)\s*$/, "");
-
-			var slice = postval.slice(0, last-1);
-			var value = slice.join( " (" );
-
-			namevalues[i] = [ value, label ];
-		}
-	}
-
-	return namevalues;
-
-}
-
-function HWLocationInput_arrayEqual(a, b)
-{
-	if (a.length!=b.length)
-		return false;
-	a=a.sort();
-	b=b.sort();
-	for (var i=0; i<a.length; i++)
-	{
-		if (a[i]!=b[i])
-			return false;
-	}
-	return true;
-}
-
 
 ( function ( $, mw ) {
-
 	'use strict';
 
   mw.log('->HWLocationInput');
 
-	/**
-	 * valuetemplate:string,
-	 * valuefield:string, value is the form field on which other select element depends on. change
-	 *  on this field will trigger a load event for selectfield.
-	 * selecttemplate:string
-	 * selectfield:string
-	 * selectismultiple:boolean, Whether this template is a multiple template.
-	 * selectquery or selectfunciton: the query ot function to execute
-	 * selectrm:boolean remove the div if the selected value for a field is not valid any more.
-	 * label: boolean, process ending content () as label in option values.
-	 * sep: Separator for the list of retrieved values, default ','
-	 */
-	var HWLocationInput_fobjs = $.parseJSON( mw.config.get( 'hwlocationinput' ) );
+  // Get configurations set at MediaWiki Config file
+  var hwConf = mw.config.get('hwConfig');
 
-	function HWLocationInput_changeHandler (src ) {
+  // Default location for the empty input
+  var defaultCenter = [48.6908333333, 9.14055555556], // Europe
+      // Defaults to zoomlevel 5 if not set (quite high from the ground)
+      defaultZoom = 5,
+      extensionRoot = mw.config.get('wgExtensionAssetsPath') + '/HWLocationInput/',
+      // Input field where location is stored will be attached to this
+      inputElement,
+      // Mapbox settings coming from MediaWiki Config file
+      mapboxUser = hwConf.vendor.mapbox_username,
+      mapboxStyleStreets = hwConf.vendor.mapbox_mapkey_streets,
+      mapboxStyleSatellite = hwConf.vendor.mapbox_mapkey_satellite,
+      mapboxAccessToken = hwConf.vendor.mapbox_access_token;
 
-		//console.log("change is called with "+src.name);
-		if (src.tagName.toLowerCase()!='select'&& src.tagName.toLowerCase()!='input')
-		{
-			return;
-		}
-		var v=jQuery(src).val();
-		if (jQuery.isArray(v))
-		{
+  // Icon for the marker
+  var markerIcon = L.icon({
+    iconUrl:       extensionRoot + 'modules/img/marker.png',
+    iconRetinaUrl: extensionRoot + 'modules/img/marker@2x.png',
+    shadowUrl:     extensionRoot + 'modules/img/marker-shadow.png',
+    iconSize:      [25, 35], // size of the icon
+    shadowSize:    [33, 33], // size of the shadow
+    iconAnchor:    [12, 35], // point of the icon which will correspond to marker's location
+    shadowAnchor:  [5, 34],  // the same for the shadow
+    popupAnchor:   [-3, -17] // point from which the popup should open relative to the iconAnchor
+  });
 
-		} else if (v==null)
-		{
-			v=[];
-		}  else
-		{
-			v=[v];
-		}
-		var srcName=HWLocationInput_parseName(src.name);
-		for(var i=0; i<HWLocationInput_fobjs.length; i++)
-		{
-			var fobj=HWLocationInput_fobjs[i];
-			if (srcName.template==fobj.valuetemplate && srcName.property==fobj.valuefield)
-			{
-				//good, we have a match.
-				// No values
-				if (v.length==0||v[0]==''){
-					HWLocationInput_setDependentValues(srcName, fobj, []);
-				} else {
-					// Values
-					var param = {}
-					param['action'] = 'sformsselect';
-					param['format'] = 'json';
-					param['sep'] = fobj.sep;
+  // Initialize modules
+  initHWLocationInput();
 
-					if (fobj.selectquery){
-						var query = fobj.selectquery.replace("@@@@", v.join('||'));
-						param['query'] = query;
-						param['approach'] = 'smw';
+  /**
+   * Init
+   */
+  function initHWLocationInput() {
 
-					} else {
-						var query = fobj.selectfunction.replace("@@@@", v.join(","));
-						param['query'] = query;
-						param['approach'] = 'function';
-					}
+    // Loop trough each `<div>` for maps.
+    // Usually there is only one of these, but if we had multiple
+    // `HW_Location` fields, we'd have multiple of these, too.
+    $('.hw_location_map').each(function() {
 
-					var posting = jQuery.get( mw.config.get('wgScriptPath')  + "/api.php", param );
-					posting.done(function( data ) {
-						// Let's pass values
-						HWLocationInput_setDependentValues(srcName, fobj, data["sformsselect"].values);
-					}).fail( function( data ) { console.log("Error!");});
+      var fieldNumber = $(this).data('field-number'),
+          // id of the `<div>` element where the map will be
+          mapId = 'hw_location_map_' + fieldNumber,
+          // id of the `<input>` field where coordinate value is stored
+          inputId = 'hw_location_input_' + fieldNumber;
 
-					break; // Avoid loading fobj again
-				}
-			}
-		}
-	}
+      // Coordinates get replaced by input value if input field isn't empty
+      // Otherwise Leaflet map gets build by default coordinates
+      var coordinates = defaultCenter;
 
-	/*
-	 * SF form add a fobj for each field in a multiple template.
-	 * In reality we only need a fobj to reduce the ajax call.
-	 */
-	function HWLocationInput_removeDuplicateFobjs( HWLocationInput_fobjs ) {
-		var newfobjs = [];
+      // Zoom is set at the `<div>` where the map will be
+      var zoom = parseInt($(this).data('zoom')) || defaultZoom;
 
-		for(var i=0; i<HWLocationInput_fobjs.length; i++) {
-			var found=false;
-			var of=HWLocationInput_fobjs[i];
-			if (!of.selectismultiple)
-			{
-				newfobjs.push(of);
-				continue;
-			}
-			for (var j=0; j<newfobjs.length; j++)
-			{
-				var nf=newfobjs[j];
-				if (of.selecttemplate==nf.selecttemplate && of.selectfield==nf.selectfield)
-				{
-					found=true;
-					break;
-				}
-			}
-			if (!found) {
-				newfobjs.push(of);
-			}
-		}
+      // Find input with values
+      inputElement = $('#' + inputId);
 
-		return newfobjs;
-	}
+      // See if input exists and has non-empty value
+      if (inputElement.length && inputElement.val()) {
 
-	//console.log( HWLocationInput_fobjs );
+        // Split coordinates (e.g. `23.324, -21.123`)
+        var coordinateValues = inputElement.val().split(',');
 
-	//simplify duplicated object.
-	HWLocationInput_fobjs = HWLocationInput_removeDuplicateFobjs( HWLocationInput_fobjs );
+        // Something's wrong if we didn't get two values
+        //
+        if (coordinateValues.length !== 2) {
+          mw.log.error('HWLocationInput: Invalid coordinates (' + coordinateValues.toString() + ') #ji32fw');
+          return;
+        }
 
-	$( "form#pfForm" ).change( function( event ){
-		HWLocationInput_changeHandler( event.target );
-	});
+        // Ensure our values are Float
+        var lat = parseFloat(coordinateValues[0]);
+        var lon = parseFloat(coordinateValues[1]);
 
-	var objs = null;
+        // Validate coordinates
+        // With latitude and longitude, the values are bounded by ±90° and ±180° respectively.
+        //if (lat > 90 || lat < 90 || lon > 180 || lon < 180) {
+        //  mw.log.error('HWLocationInput: Invalid latitude or longitude (' + coordinateValues.toString() + ') #fau3kk');
+        //  return;
+        //}
 
-	//fields loading at load time.
-	for (var i=0; i<HWLocationInput_fobjs.length; i++){
+        // Use input coordinates instead of previously set default map location
+        coordinates = [lat, lon];
+      }
 
-		var fobj = HWLocationInput_fobjs[i];
-		var valuepat = "input[name='" + fobj.valuetemplate + "\\["+ fobj.valuefield + "\\]']";
+      // Construct the map with the data we have
+      constructMap(
+        mapId,
+        zoom,
+        coordinates
+      );
+    });
+  }
 
-		if ($(valuepat).val()){
-			objs=jQuery(valuepat);
-		} else{
-			valuepat= "select[name='" + fobj.valuetemplate + "\\["+ fobj.valuefield + "\\]']";
-			objs=jQuery(valuepat);
-		}
 
-		objs.trigger("change");
+  /**
+   * Construct the map
+   *
+   * @param mapId String Value of the `id` attribute of the `<div>` where
+   *   Leaflet map should be constructed to
+   * @param zoom Int Zoom level where map should be initialized
+   * @param coordinates Array Coordinates where map should be centered when
+   *   initialized and where the location marker should be placed to.
+   */
+  function constructMap(mapId, zoom, coordinates) {
+    mw.log('->HWLocationInput->initializeHWLocationInput: ' + mapId);
 
-	}
+    if (!mapId || !zoom || !coordinates) {
+      mw.log.error('HWLocationInput::initializeHWLocationInput: no mapId, zoom or coordinates defined. #UFak22');
+      return;
+    }
+
+    // Array containing possibly multiple map objects
+    var maps = [];
+
+    // Create the Leaflet map
+    maps[mapId] = L.map(mapId, {
+      center: coordinates,
+      zoom: zoom,
+      attributionControl: false
+    });
+
+    // Fixes map loading partially, probably some sort of a CSS issue but this fixes it...
+    // Feel free to fix if you have spare time. ;-)
+    maps[mapId].whenReady(function() {
+      setTimeout(function() { maps[mapId].invalidateSize(); }, 1000);
+    });
+
+    // Using Mapbox tiles developed for Trustroots+Hitchwiki
+    var mapBoxUrl = 'https://{s}.tiles.mapbox.com/v4/{user}.{map}/{z}/{x}/{y}.png' + L.Util.getParamString({
+      secure: 1, // 1=true | 0=false
+      access_token: mapboxAccessToken
+    });
+
+    var mapBoxAttribution = '<strong><a href="https://www.mapbox.com/map-feedback/#' + mapboxUser + '.' + mapboxStyleStreets + '/' + zoom[1] + '/' + zoom[0] + '/' + defaultZoom + '">Improve this map</a></strong>';
+
+    // Options for the Leaflet layer
+    // http://leafletjs.com/reference.html#tilelayer
+    L.tileLayer(mapBoxUrl, {
+      attribution: mapBoxAttribution,
+      maxZoom: 18,
+      continuousWorld: true,
+      user: mapboxUser,
+      map: mapboxStyleStreets
+    }).addTo(maps[mapId]);
+
+    // Marker placed to coordinates found from the input field
+    var marker = L.marker(coordinates, {
+      draggable: true,
+      icon: markerIcon
+    }).addTo(maps[mapId]);
+
+    // Event listener:
+    // When clicking on map canvas, move both
+    // map center and marker to that location
+    // and update the location field
+    maps[mapId].on('click', function(e) {
+      maps[mapId].panTo(e.latlng);
+      marker.setLatLng(e.latlng);
+      updateHWLocationInput(e.latlng);
+    });
+
+    // Event listener:
+    // After dragging the marker, update the location field
+    marker.on('dragend', function(e) {
+      updateHWLocationInput(marker.getLatLng());
+    });
+  }
+
+  /**
+   * Updates input field with coordinates string (e.g. `23.14124, 21.12312`)
+   *
+   * @param coordinates LatLng http://leafletjs.com/reference-1.0.0.html#latlng
+   */
+  function updateHWLocationInput(coordinates) {
+    inputElement.val(coordinates.lat + ', ' + coordinates.lng);
+  }
 
 }( jQuery, mediaWiki ) );

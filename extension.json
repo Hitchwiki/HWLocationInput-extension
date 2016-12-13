@@ -24,6 +24,11 @@
 	"ExtensionFunctions": [
 		"HWLocationInput::onExtensionFunction"
 	],
+  "Hooks": {
+    "ResourceLoaderGetConfigVars": [
+      "HWLocationInput::onResourceLoaderGetConfigVars"
+    ]
+  },
 	"load_composer_autoloader": true,
 	"manifest_version": 1
 }
