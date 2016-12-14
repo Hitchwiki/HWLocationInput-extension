@@ -4,6 +4,7 @@ namespace HWLI;
 
 use SMWQueryProcessor as QueryProcessor;
 use Parser;
+use Html;
 
 /**
  * @license MIT
@@ -53,30 +54,46 @@ class HWLocationInput {
 		$height = array_key_exists( 'height', $otherArgs ) ? strip_tags($otherArgs['height']) : '300px';
 		$zoom = array_key_exists( 'zoom', $otherArgs ) ? intval($otherArgs['zoom']) : 5;
 
-    // Input arguments for disabled fields
-    $disabledArg = $isDisabled ? 'disabled="disabled" ' : '';
-
-    // input arguments for mandatory fields
-    $mandatoryArg = $isMandatory ? 'class="mandatoryField" ' : '';
-
-		// TODO Use Html::
     // https://doc.wikimedia.org/mediawiki-core/1.28.0/php/classHtml.html
     // https://www.mediawiki.org/wiki/Manual:Html.php
-    $html = '<div' .
-              ' class="hw_location_map"' .
-              ' id="hw_location_map_' . $wgHWLICount . '"' .
-              ' data-field-number="' . $wgHWLICount . '"' .
-              ' data-zoom="' . $zoom . '"' .
-              ' style="width:' . $width . ';height:' . $height . ';"' .
-            '></div>';
+    $html = Html::element('div',
+      array(
+        'class' => 'hw_location_map',
+        'id' => 'hw_location_map_' . $wgHWLICount,
+        'style' => 'width:' . $width . ';height:' . $height . ';',
+        'data-field-number' => $wgHWLICount,
+        'data-zoom' => $zoom
+      )
+    );
 
-    $html .= '<input type="hidden" name="' . $inputName . '" value="' . $value . '" id="hw_location_input_' . $wgHWLICount . '" ' . $disabledArg . $mandatoryArg . ' />';
+    // Arguments for input DOM element
+    $inputArgs = array(
+      'type' => 'hidden',
+      'name' => $inputName,
+      'id' => 'hw_location_input_' . $wgHWLICount,
+      'value' => $value
+    );
 
-		$html .= '<span id="info_' . $wgHWLICount . '" class="errorMessage"></span>';
+    // Input is disabled
+    if ($isDisabled) {
+      $inputArgs['disabled'] = 'disabled';
+    }
 
-		Output::commitToParserOutput($this->parser->getOutput());
+    // Input is mandatory
+    if ($isMandatory) {
+      $inputArgs['class'] = 'mandatoryField';
+    }
 
-		return $html;
-	}
+    $html .= Html::element('input', $inputArgs);
+
+    $html .= Html::element('span', array(
+      'id' => 'info_' . $wgHWLICount,
+      'class' => 'errorMessage'
+    ));
+
+    Output::commitToParserOutput($this->parser->getOutput());
+
+    return $html;
+  }
 
 }
