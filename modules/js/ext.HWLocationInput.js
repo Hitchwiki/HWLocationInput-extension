@@ -4,7 +4,7 @@
  */
 
 ( function ( $, mw ) {
-	'use strict';
+  'use strict';
 
   mw.log('->HWLocationInput');
 
