@@ -3,10 +3,10 @@
  * Relies to Leaflet.js
  */
 
-( function ( $, mw ) {
+(function ($, mw) {
   'use strict';
 
-  mw.log('->HWLocationInput');
+  mw.log('HWLocationInput');
 
   // Get configurations set at MediaWiki Config file
   var hwConf = mw.config.get('hwConfig');
@@ -80,7 +80,7 @@
 
         // Ensure our values are Float
         var lat = parseFloat(coordinateValues[0]);
-        var lon = parseFloat(coordinateValues[1]);
+        var lng = parseFloat(coordinateValues[1]);
 
         // Validate coordinates
         // With latitude and longitude, the values are bounded by ±90° and ±180° respectively.
@@ -90,7 +90,7 @@
         //}
 
         // Use input coordinates instead of previously set default map location
-        coordinates = [lat, lon];
+        coordinates = [lat, lng];
       }
 
       // Construct the map with the data we have
@@ -113,7 +113,7 @@
    *   initialized and where the location marker should be placed to.
    */
   function constructMap(mapId, zoom, coordinates) {
-    mw.log('->HWLocationInput->initializeHWLocationInput: ' + mapId);
+    mw.log('HWLocationInput::initializeHWLocationInput: ' + mapId);
 
     if (!mapId || !zoom || !coordinates) {
       mw.log.error('HWLocationInput::initializeHWLocationInput: no mapId, zoom or coordinates defined. #UFak22');
@@ -183,7 +183,9 @@
    * @param coordinates LatLng http://leafletjs.com/reference-1.0.0.html#latlng
    */
   function updateHWLocationInput(coordinates) {
+    mw.log('HWLocationInput::updateHWLocationInput:');
+    mw.log(coordinates);
     inputElement.val(coordinates.lat + ', ' + coordinates.lng);
   }
 
-}( jQuery, mediaWiki ) );
+}(jQuery, mediaWiki) );
