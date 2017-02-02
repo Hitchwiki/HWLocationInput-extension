@@ -8,33 +8,18 @@
 
   mw.log('HWLocationInput');
 
-  // Get configurations set at MediaWiki Config file
-  var hwConf = mw.config.get('hwConfig');
-
   // Default location for the empty input
   var defaultCenter = [48.6908333333, 9.14055555556], // Europe
       // Defaults to zoomlevel 5 if not set (quite high from the ground)
       defaultZoom = 5,
       extensionRoot = mw.config.get('wgExtensionAssetsPath') + '/HWLocationInput/',
       // Input field where location is stored will be attached to this
-      inputElement,
-      // Mapbox settings coming from MediaWiki Config file
-      mapboxUser = hwConf.vendor.mapbox_username,
-      mapboxStyleStreets = hwConf.vendor.mapbox_mapkey_streets,
-      mapboxStyleSatellite = hwConf.vendor.mapbox_mapkey_satellite,
-      mapboxAccessToken = hwConf.vendor.mapbox_access_token;
+      inputElement;
 
-  // Icon for the marker
-  var markerIcon = L.icon({
-    iconUrl:       extensionRoot + 'modules/img/marker.png',
-    iconRetinaUrl: extensionRoot + 'modules/img/marker@2x.png',
-    shadowUrl:     extensionRoot + 'modules/img/marker-shadow.png',
-    iconSize:      [25, 35], // size of the icon
-    shadowSize:    [33, 33], // size of the shadow
-    iconAnchor:    [12, 35], // point of the icon which will correspond to marker's location
-    shadowAnchor:  [5, 34],  // the same for the shadow
-    popupAnchor:   [-3, -17] // point from which the popup should open relative to the iconAnchor
-  });
+    // Mapbox settings coming from MediaWiki Config file
+    var mapboxUser = _.get(mw, 'HWMaps.config.vendor.mapbox_username', false),
+        mapboxAccessToken = _.get(mw, 'HWMaps.config.vendor.mapbox_access_token', false),
+        mapboxStyleStreets = _.get(mw, 'HWMaps.config.vendor.mapbox_mapkey_streets', false);
 
   // Initialize modules
   initHWLocationInput();
@@ -136,23 +121,55 @@
       setTimeout(function() { maps[mapId].invalidateSize(); }, 1000);
     });
 
-    // Using Mapbox tiles developed for Trustroots+Hitchwiki
-    var mapBoxUrl = 'https://{s}.tiles.mapbox.com/v4/{user}.{map}/{z}/{x}/{y}.png' + L.Util.getParamString({
-      secure: 1, // 1=true | 0=false
-      access_token: mapboxAccessToken
+    // These will be filled either by MapBox or OSM tile layer details
+    var layerOptions,
+        tilesUrl;
+
+    if (mapboxUser && mapboxAccessToken && mapboxStyleStreets) {
+      // Using Mapbox tiles
+      tilesUrl = 'https://{s}.tiles.mapbox.com/v4/{user}.{map}/{z}/{x}/{y}.png' + L.Util.getParamString({
+        secure: 1, // 1=true | 0=false
+        access_token: mapboxAccessToken
+      });
+
+      layerOptions = {
+        attribution: '© <a href="https://www.openstreetmap.org/">OSM</a>. <strong><a href="https://www.mapbox.com/map-feedback/#' + mapboxUser + '.' + mapboxStyleStreets + '/' + coordinates[1] + '/' + coordinates[0] + '/' + zoom + '">Improve this map</a></strong>',
+        user: mapboxUser,
+        map: mapboxStyleStreets
+      };
+    } else {
+      // If no MapBox available, fall back to OSM
+      tilesUrl = '//{s}.tile.osm.org/{z}/{x}/{y}.png';
+      layerOptions = {
+        attribution: '© <a href="https://www.openstreetmap.org/" target="_blank">OSM</a> &amp; <a href="https://www.mapbox.com/" target="_blank">MapBox</a>. <strong><a href="https://www.openstreetmap.org/login#map=' + zoom + '/' + coordinates[0] + '/' + coordinates[1] + '">Improve this map</a></strong>'
+      };
+    }
+
+    // Default settings for all layers (both OSM and MapBox)
+    // http://leafletjs.com/reference-1.0.2.html#util-extend
+    layerOptions = L.extend(layerOptions, {
+      maxZoom: 18,
+      continuousWorld: true
     });
 
-    var mapBoxAttribution = '<strong><a href="https://www.mapbox.com/map-feedback/#' + mapboxUser + '.' + mapboxStyleStreets + '/' + zoom[1] + '/' + zoom[0] + '/' + defaultZoom + '">Improve this map</a></strong>';
-
-    // Options for the Leaflet layer
+    // Add Leaflet tile layer to the map
     // http://leafletjs.com/reference.html#tilelayer
-    L.tileLayer(mapBoxUrl, {
-      attribution: mapBoxAttribution,
-      maxZoom: 18,
-      continuousWorld: true,
-      user: mapboxUser,
-      map: mapboxStyleStreets
-    }).addTo(maps[mapId]);
+    L.tileLayer(
+      tilesUrl,
+      layerOptions
+    ).addTo(maps[mapId]);
+
+    // Icon for the marker
+    var markerIcon = L.icon({
+      iconUrl:       extensionRoot + 'modules/img/marker.png',
+      iconRetinaUrl: extensionRoot + 'modules/img/marker@2x.png',
+      shadowUrl:     extensionRoot + 'modules/img/marker-shadow.png',
+      iconSize:      [25, 35], // size of the icon
+      shadowSize:    [33, 33], // size of the shadow
+      iconAnchor:    [12, 35], // point of the icon which will correspond to marker's location
+      shadowAnchor:  [5, 34],  // the same for the shadow
+      popupAnchor:   [-3, -17] // point from which the popup should open relative to the iconAnchor
+    });
 
     // Marker placed to coordinates found from the input field
     var marker = L.marker(coordinates, {
