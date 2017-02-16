@@ -139,8 +139,10 @@
       };
     } else {
       // If no MapBox available, fall back to OSM
-      tilesUrl = '//{s}.tile.osm.org/{z}/{x}/{y}.png';
+      tilesUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
       layerOptions = {
+        subdomains: ['a', 'b', 'c'],
         attribution: '© <a href="https://www.openstreetmap.org/" target="_blank">OSM</a> &amp; <a href="https://www.mapbox.com/" target="_blank">MapBox</a>. <strong><a href="https://www.openstreetmap.org/login#map=' + zoom + '/' + coordinates[0] + '/' + coordinates[1] + '">Improve this map</a></strong>'
       };
     }
