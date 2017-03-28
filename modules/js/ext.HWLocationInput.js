@@ -9,23 +9,29 @@
   mw.log('HWLocationInput');
 
   // Default location for the empty input
-  var defaultCenter = [48.6908333333, 9.14055555556], // Europe
-      // Defaults to zoomlevel 5 if not set (quite high from the ground)
-      defaultZoom = 5,
-      extensionRoot = mw.config.get('wgExtensionAssetsPath') + '/HWLocationInput/',
-      // Input field where location is stored will be attached to this
-      inputElement;
+  // defaults to Europe `[(float) lat, (float) lng]`
+  var defaultCenter = mw.config.get('hwLocationInputDefaultCenter', [48.6908333333, 9.14055555556]);
 
-    // Mapbox settings coming from MediaWiki Config file
-    var mapboxUser = _.get(mw, 'HWMaps.config.vendor.mapbox_username', false),
-        mapboxAccessToken = _.get(mw, 'HWMaps.config.vendor.mapbox_access_token', false),
-        mapboxStyleStreets = _.get(mw, 'HWMaps.config.vendor.mapbox_mapkey_streets', false);
+  // Defaults to zoomlevel 5 if not set (quite high from the ground)
+  var defaultZoom = mw.config.get('hwLocationInputDefaultZoom', 5);
 
-  // Initialize modules
+  // Input field where location is stored will be attached to this
+  var inputElement;
+
+  // Mapbox settings coming from MediaWiki Config file
+  var mapboxUsername = mw.config.get('hwLocationInputMapboxUsername', false),
+      mapboxAccessToken = mw.config.get('hwLocationInputMapboxAccessToken', false),
+      mapboxMapkeyStreets = mw.config.get('hwLocationInputMapboxMapkeyStreets', false);
+
+  // Path for extension images
+  var extensionImagesFolder = mw.config.get('wgExtensionAssetsPath') + '/HWLocationInput/modules/img/';
+
+  // Initialize UI
   initHWLocationInput();
 
+
   /**
-   * Init
+   * Initialize UI
    */
   function initHWLocationInput() {
 
@@ -125,7 +131,7 @@
     var layerOptions,
         tilesUrl;
 
-    if (mapboxUser && mapboxAccessToken && mapboxStyleStreets) {
+    if (mapboxUsername && mapboxAccessToken && mapboxMapkeyStreets) {
       // Using Mapbox tiles
       tilesUrl = 'https://{s}.tiles.mapbox.com/v4/{user}.{map}/{z}/{x}/{y}.png' + L.Util.getParamString({
         secure: 1, // 1=true | 0=false
@@ -133,9 +139,9 @@
       });
 
       layerOptions = {
-        attribution: '© <a href="https://www.openstreetmap.org/">OSM</a>. <strong><a href="https://www.mapbox.com/map-feedback/#' + mapboxUser + '.' + mapboxStyleStreets + '/' + coordinates[1] + '/' + coordinates[0] + '/' + zoom + '">Improve this map</a></strong>',
-        user: mapboxUser,
-        map: mapboxStyleStreets
+        attribution: '© <a href="https://www.openstreetmap.org/">OSM</a>. <strong><a href="https://www.mapbox.com/map-feedback/#' + mapboxUsername + '.' + mapboxMapkeyStreets + '/' + coordinates[1] + '/' + coordinates[0] + '/' + zoom + '">Improve this map</a></strong>',
+        user: mapboxUsername,
+        map: mapboxMapkeyStreets
       };
     } else {
       // If no MapBox available, fall back to OSM
@@ -163,9 +169,9 @@
 
     // Icon for the marker
     var markerIcon = L.icon({
-      iconUrl:       extensionRoot + 'modules/img/marker.png',
-      iconRetinaUrl: extensionRoot + 'modules/img/marker@2x.png',
-      shadowUrl:     extensionRoot + 'modules/img/marker-shadow.png',
+      iconUrl:       extensionImagesFolder + 'marker.png',
+      iconRetinaUrl: extensionImagesFolder + 'marker@2x.png',
+      shadowUrl:     extensionImagesFolder + 'marker-shadow.png',
       iconSize:      [25, 35], // size of the icon
       shadowSize:    [33, 33], // size of the shadow
       iconAnchor:    [12, 35], // point of the icon which will correspond to marker's location

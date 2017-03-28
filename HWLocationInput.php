@@ -81,31 +81,43 @@ class HWLocationInput {
   }
 
   /**
+   * Expose config variables to JS frontend. Read them by:
+   * ```
+   * mw.config.get('keyname');
+   * ```
+   * Where keyname is e.g. `hwMapBoxUsername` or `hwDefaultCenter`.
+   *
+   * Set default value if config key doesn't exist:
+   * ```
+   * mw.config.get('keyname', 'defaultvalue');
+   * ```
+   *
+   * https://www.mediawiki.org/wiki/Manual:Interface/JavaScript#mw.config
+   *
    * @since 1.0
    *
    * @return boolean
    */
   public static function onResourceLoaderGetConfigVars( array &$vars ) {
-    global $hwConfig;
 
-    $varNames = array( // explicit list to avoid private tokens ending up in JS vars
-      'mapbox_username',
-      'mapbox_access_token',
-      'mapbox_mapkey_streets',
-      'mapbox_mapkey_satellite'
-    );
+    // Defined at MediaWiki config file
+    global $hwMapboxUsername,
+           $hwMapboxAccessToken,
+           $hwMapboxMapkeyStreets,
+           $hwDefaultCenter,
+           $hwDefaultZoom;
 
-    foreach ($varNames as $varName) {
-      if (!isset($hwConfig['vendor'][$varName])) {
-        // doesn't look like there's a better way to handle this case
-        throw new Exception('vendor.' . $hwConfig['vendor'][$varName] . ' config option missing');
-      }
-      $vars[$varName] = $hwConfig['vendor'][$varName];
-    }
+    // MapBox config
+    $vars['hwLocationInputMapboxUsername'] = $hwMapboxUsername ? $hwMapboxUsername : false;
+    $vars['hwLocationInputMapboxAccessToken'] = $hwMapboxAccessToken ? $hwMapboxAccessToken : false;
+    $vars['hwLocationInputMapboxMapkeyStreets'] = $hwMapboxMapkeyStreets ? $hwMapboxMapkeyStreets : false;
 
-    $vars['hwConfig'] = array(
-      'vendor' => $vars
-    );
+    // Default center for maps (Europe)
+    // `[(float) latitude, (float) longitude]`
+    $vars['hwLocationInputDefaultCenter'] = $hwDefaultCenter ? $hwDefaultCenter : array(48.6908333333, 9.14055555556);
+
+    // Default zoom for maps (integer 1-22)
+    $vars['hwLocationInputDefaultZoom'] = $hwDefaultZoom ? $hwDefaultZoom : 5;
 
     return true;
   }

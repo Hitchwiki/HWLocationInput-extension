@@ -17,17 +17,19 @@ Clone under `extensions`:
 ```bash
 git clone https://github.com/Hitchwiki/HWLocationInput-extension.git extensions/HWLocationInput
 ```
-Add to LocalSettings.php
+
+Add to `LocalSettings.php`
 ```php
 wfLoadExtension('HWLocationInput');
 ```
 
-Make sure you have these defined at LocalSettings.php:
+Make sure you have these defined at `LocalSettings.php`:
 ```php
-$hwConfig['vendor']['mapbox_username']
-$hwConfig['vendor']['mapbox_access_token']
-$hwConfig['vendor']['mapbox_mapkey_streets']
-$hwConfig['vendor']['mapbox_mapkey_satellite']
+$hwGeonamesUsername
+$hwMapboxUsername
+$hwMapboxAccessToken
+$hwMapboxMapkeyStreets
+$hwMapboxMapkeySatellite
 ```
 
 # License
